@@ -7,6 +7,7 @@ export interface Env {
   CUSTOMER_IDENTITY?: Fetcher;
   PAYMENTS?: Fetcher;
   DOWNLOADS?: Fetcher;
+  DOWNLOADS_SECRET?: string;
   MARKETPLACE_ORIGIN?: string;
   STAFF_CREDENTIALS?: string;
   AUTOMATION_CREDENTIALS?: string;
