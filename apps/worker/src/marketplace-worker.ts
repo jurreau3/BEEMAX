@@ -1,5 +1,6 @@
 import type { Env } from "./types";
 import { marketplaceApi, reconcilePayments } from "./marketplace";
+import { handleWardrobeCheckout } from "./wardrobe-checkout";
 import {
   createMarketplaceDownloadGrant,
   grantFromRequest,
@@ -46,7 +47,9 @@ export default {
       return Response.json({ error: "Not found" }, { status: 404, headers });
     try {
       let response: Response;
-      if (url.pathname === "/api/downloads/resolve") {
+      if (url.pathname === "/api/wardrobe/checkout") {
+        response = await handleWardrobeCheckout(request, env);
+      } else if (url.pathname === "/api/downloads/resolve") {
         response = await resolveMarketplaceDownloadGrant(request, env);
       } else if (
         url.pathname === "/api/downloads" &&
