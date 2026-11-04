@@ -13,8 +13,9 @@ binding = "DB"
 database_name = "portal-os1-production1-db"
 database_id = "73b4f0ee-5eb1-4ccd-9b50-1ec9ab39532b"
 migrations_dir = "apps/worker/d1/migrations"
-# Add CUSTOMER_IDENTITY, PAYMENTS and DOWNLOADS Worker service bindings once
-# the corresponding trusted adapters are implemented and deployed.
+# Provision DOWNLOADS_SECRET as a Wrangler secret (minimum 32 random bytes),
+# not as a plaintext [vars] entry. The audited HMAC route is enabled when set.
+# Keep DOWNLOADS as a trusted service binding that issues provider-native URLs.
 # No public endpoint accepts payment or execution success from a browser.
 
 [triggers]

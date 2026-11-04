@@ -1,5 +1,10 @@
 import type { Env } from "./types";
 import { marketplaceApi, reconcilePayments } from "./marketplace";
+import {
+  createMarketplaceDownloadGrant,
+  grantFromRequest,
+  resolveMarketplaceDownloadGrant,
+} from "./marketplace-downloads";
 export { InstantSpaceDurableObject } from "./InstantSpaceDurableObject";
 export { MicrokernelProcessActor } from "./kernel";
 export { ProductFactoryActor } from "./factory";
@@ -40,7 +45,25 @@ export default {
     if (!url.pathname.startsWith("/api/"))
       return Response.json({ error: "Not found" }, { status: 404, headers });
     try {
-      const response = await marketplaceApi(request, env);
+      let response: Response;
+      if (url.pathname === "/api/downloads/resolve") {
+        response = await resolveMarketplaceDownloadGrant(request, env);
+      } else if (
+        url.pathname === "/api/downloads" &&
+        request.method === "POST" &&
+        env.DOWNLOADS_SECRET
+      ) {
+        // Enable the audited HMAC flow when the dedicated production secret is
+        // provisioned. Without it, preserve the existing trusted DOWNLOADS adapter.
+        response = await grantFromRequest(request, env);
+      } else if (
+        url.pathname === "/api/downloads/grant" &&
+        request.method === "POST"
+      ) {
+        response = await grantFromRequest(request, env);
+      } else {
+        response = await marketplaceApi(request, env);
+      }
       headers.forEach((value, key) => response.headers.set(key, value));
       return response;
     } catch (error) {
