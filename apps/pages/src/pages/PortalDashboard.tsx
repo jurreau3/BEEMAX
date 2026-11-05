@@ -1,4 +1,5 @@
 import { BemaxLogoCanvas } from "../components/BemaxLogoCanvas";
+import { TelemetryStatsPanel } from "../components/TelemetryStatsPanel";
 import Dashboard from "./Dashboard";
 
 const sampleTelemetry = [
@@ -7,7 +8,7 @@ const sampleTelemetry = [
   ["QAL Ed25519 Check", "SECURE"],
 ];
 
-/** Keeps the existing live dashboard and adds the supplied telemetry visualization. */
+/** Keeps the existing dashboard and separates illustrative values from live evidence. */
 export default function PortalDashboard() {
   return (
     <>
@@ -22,10 +23,10 @@ export default function PortalDashboard() {
         </header>
         <div className="telemetry-grid">
           <BemaxLogoCanvas width="100%" height="360px" />
-          <aside className="telemetry-health" aria-label="Sample node health">
+          <aside className="telemetry-health" aria-label="Telemetry status">
             <div className="telemetry-health-heading">
               <h3>Node Health</h3>
-              <span>Sample values</span>
+              <span>Illustrative values</span>
             </div>
             <dl>
               {sampleTelemetry.map(([label, status]) => (
@@ -35,9 +36,10 @@ export default function PortalDashboard() {
                 </div>
               ))}
             </dl>
-            <p>These illustrative statuses are not connected to live telemetry.</p>
+            <p>These status labels are illustrative and are not connected to live node monitoring.</p>
           </aside>
         </div>
+        <TelemetryStatsPanel />
       </section>
       <Dashboard />
     </>

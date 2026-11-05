@@ -3,6 +3,7 @@ import { reconcileCompensation } from "./execution.js";
 import { protectPortal, auditAccess } from "./access.js";
 import kernel from "./kernel.js";
 import { routeApi } from "./routes/api.js";
+import { telemetryStatsApi } from "./routes/telemetry.js";
 import { bemaxApi, compatibilityApi } from "./bemax.js";
 import { createEdgeRuntime } from "./runtime.js";
 import { streamTokenApi } from "./stream.js";
@@ -71,6 +72,13 @@ export default {
         ctx.waitUntil(auditAccess(env, request, null, access.status));
         headers.forEach((value, key) => access.headers.set(key, value));
         return access;
+      }
+
+      const telemetry = await telemetryStatsApi(request, env);
+      if (telemetry) {
+        ctx.waitUntil(auditAccess(env, request, access, telemetry.status));
+        headers.forEach((value, key) => telemetry.headers.set(key, value));
+        return telemetry;
       }
 
       if (path === "/api/stream/token") {
