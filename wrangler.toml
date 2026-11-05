@@ -1,6 +1,6 @@
 name = "beemax"
 main = "apps/worker/src/index.ts"
-compatibility_date = "2026-10-30"
+compatibility_date = "2026-10-26"
 account_id = "cfbebee3f0343be6fb2ed557bd4da8a1"
 
 [vars]
