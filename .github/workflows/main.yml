@@ -148,3 +148,64 @@ jobs:
           if [ -f pages.pid ]; then
             kill "$(cat pages.pid)" || true
           fi
+
+  staging-smoke-test:
+    name: Live staging smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build-and-test
+    # These are repository Actions variables, not secrets. Configure both with
+    # the HTTPS origins of already-deployed staging Workers. This job tests the
+    # deployed staging services; it intentionally does not deploy from CI.
+    if: >-
+      ${{
+        (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
+        vars.STAGING_WORKER_URL != '' &&
+        vars.STAGING_MARKETPLACE_WORKER_URL != ''
+      }}
+    env:
+      STAGING_WORKER_URL: ${{ vars.STAGING_WORKER_URL }}
+      STAGING_MARKETPLACE_WORKER_URL: ${{ vars.STAGING_MARKETPLACE_WORKER_URL }}
+    steps:
+      - name: Validate staging Worker and Marketplace endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          check_json_status() {
+            local url="$1"
+            local expected_status="$2"
+            local body_file headers_file status
+            body_file="$(mktemp)"
+            headers_file="$(mktemp)"
+
+            status="$(curl --retry 5 --retry-all-errors --retry-delay 2 \
+              --silent --show-error \
+              --output "$body_file" --dump-header "$headers_file" \
+              --write-out '%{http_code}' "$url")"
+
+            if [[ "$status" != "$expected_status" ]]; then
+              echo "Smoke test failed: $url returned HTTP $status; expected $expected_status" >&2
+              cat "$body_file" >&2
+              return 1
+            fi
+            if ! grep -qi '^content-type: application/json' "$headers_file"; then
+              echo "Smoke test failed: $url did not return JSON" >&2
+              cat "$headers_file" >&2
+              return 1
+            fi
+            echo "✓ $url returned HTTP $status with JSON content"
+          }
+
+          # /healthz is a read-only runtime wiring check, not a production
+          # readiness attestation or external provider reachability probe.
+          check_json_status "${STAGING_WORKER_URL%/}/healthz" 200
+
+          # Verify the private provider API rejects anonymous requests. The
+          # portal Worker protects this API; /portal/analytics is not a Worker
+          # API endpoint and is not used as an authorization assertion.
+          check_json_status "${STAGING_WORKER_URL%/}/api/providers/health" 401
+
+          # The deployed Marketplace Worker exposes its public catalog at
+          # /api/products (not /api/v1/marketplace/catalog).
+          check_json_status "${STAGING_MARKETPLACE_WORKER_URL%/}/api/products" 200
