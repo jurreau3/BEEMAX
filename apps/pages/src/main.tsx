@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Link, Navigate, Outlet } from "react-router-dom";
 import { GovernorLayout, useGovernor } from "./layouts/GovernorLayout";
 import { MainLayout } from "./layouts/MainLayout";
-import Dashboard from "./pages/Dashboard";
+import PortalDashboard from "./pages/PortalDashboard";
 import Portfolio from "./pages/Portfolio";
 import Pipeline from "./pages/Pipeline";
 import Products from "./pages/Products";
@@ -32,6 +32,7 @@ import BemaxHome from "./pages/BemaxHome";
 import { SpatialHUDPage } from "./pages/SpatialHUDPage";
 import "./style.css";
 import "./hud.css";
+import "./telemetry.css";
 
 function RoleHome() {
   return <Navigate replace to={useGovernor().role === "Governor" ? "/portal/governor" : "/portal/ecosystem"} />;
@@ -52,7 +53,7 @@ createRoot(document.getElementById("root")!).render(
       <Route path="hud" element={<AuthenticatedHUD />} />
       <Route element={<MainLayout />}>
         <Route index element={<RoleHome />} />
-        <Route path="portal/dashboard" element={<Dashboard />} />
+        <Route path="portal/dashboard" element={<PortalDashboard />} />
         <Route path="portal/bemax" element={<BemaxHome />} />
         <Route path="portal/products" element={<Products />} />
         <Route path="portal/products/:id" element={<ProductDetail />} />
@@ -76,7 +77,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="portal/departments" element={<Departments />} />
         <Route path="portal/approvals" element={<Approvals />} />
         <Route path="portal/forecasting" element={<Forecasting />} />
-        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="dashboard" element={<PortalDashboard />} />
         <Route path="bemax" element={<BemaxHome />} />
         <Route path="portfolio" element={<Portfolio />} />
         <Route path="pipeline" element={<Pipeline />} />
